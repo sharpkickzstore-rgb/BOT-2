@@ -7,7 +7,19 @@ import praw
 import schedule
 import smtplib
 from email.mime.text import MIMEText
+# ---- Twitter environment variables (ADD THIS BLOCK) ----
+TW_API_KEY       = os.getenv("TW_API_KEY")       or os.getenv("TWITTER_API_KEY")
+TW_API_SECRET    = os.getenv("TW_API_SECRET")    or os.getenv("TWITTER_API_SECRET")
+TW_ACCESS_TOKEN  = os.getenv("TW_ACCESS_TOKEN")  or os.getenv("TWITTER_ACCESS_TOKEN")
+TW_ACCESS_SECRET = os.getenv("TW_ACCESS_SECRET") or os.getenv("TWITTER_ACCESS_SECRET")
 
+TW_READY = all([TW_API_KEY, TW_API_SECRET, TW_ACCESS_TOKEN, TW_ACCESS_SECRET])
+
+# Optional debug: shows True/False for presence (remove after verifying)
+print("TW vars present:",
+      bool(TW_API_KEY), bool(TW_API_SECRET),
+      bool(TW_ACCESS_TOKEN), bool(TW_ACCESS_SECRET))
+# ---------------------------------------------------------
 # -------------------------------
 # CONFIG
 # -------------------------------
