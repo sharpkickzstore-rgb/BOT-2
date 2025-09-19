@@ -7,19 +7,46 @@ import praw
 import schedule
 import smtplib
 from email.mime.text import MIMEText
-# ---- Twitter environment variables (ADD THIS BLOCK) ----
-TW_API_KEY       = os.getenv("TW_API_KEY")       or os.getenv("TWITTER_API_KEY")
-TW_API_SECRET    = os.getenv("TW_API_SECRET")    or os.getenv("TWITTER_API_SECRET")
-TW_ACCESS_TOKEN  = os.getenv("TW_ACCESS_TOKEN")  or os.getenv("TWITTER_ACCESS_TOKEN")
-TW_ACCESS_SECRET = os.getenv("TW_ACCESS_SECRET") or os.getenv("TWITTER_ACCESS_SECRET")
+def _get_env_any(*names):
+    """Return first non-empty env var among the provided names."""
+    for n in names:
+        v = os.getenv(n)
+        if v is not None and str(v).strip():
+            return str(v).strip()
+    return None
+
+# Accept MANY common naming schemes (no need to edit your Render env)
+TW_API_KEY       = _get_env_any("TW_API_KEY", "TWITTER_API_KEY", "X_API_KEY", "CONSUMER_KEY")
+TW_API_SECRET    = _get_env_any("TW_API_SECRET", "TWITTER_API_SECRET", "X_API_SECRET", "CONSUMER_SECRET")
+TW_ACCESS_TOKEN  = _get_env_any("TW_ACCESS_TOKEN", "TWITTER_ACCESS_TOKEN", "X_ACCESS_TOKEN", "ACCESS_TOKEN")
+TW_ACCESS_SECRET = _get_env_any("TW_ACCESS_SECRET", "TWITTER_ACCESS_SECRET", "X_ACCESS_SECRET", "ACCESS_TOKEN_SECRET")
 
 TW_READY = all([TW_API_KEY, TW_API_SECRET, TW_ACCESS_TOKEN, TW_ACCESS_SECRET])
 
-# Optional debug: shows True/False for presence (remove after verifying)
-print("TW vars present:",
-      bool(TW_API_KEY), bool(TW_API_SECRET),
-      bool(TW_ACCESS_TOKEN), bool(TW_ACCESS_SECRET))
-# ---------------------------------------------------------
+# Show which VARIABLE NAMES were found (not the secret values)
+found = {
+    "API_KEY":       next((n for n in ["TW_API_KEY","TWITTER_API_KEY","X_API_KEY","CONSUMER_KEY"] if os.getenv(n)), None),
+    "API_SECRET":    next((n for n in ["TW_API_SECRET","TWITTER_API_SECRET","X_API_SECRET","CONSUMER_SECRET"] if os.getenv(n)), None),
+    "ACCESS_TOKEN":  next((n for n in ["TW_ACCESS_TOKEN","TWITTER_ACCESS_TOKEN","X_ACCESS_TOKEN","ACCESS_TOKEN"] if os.getenv(n)), None),
+    "ACCESS_SECRET": next((n for n in ["TW_ACCESS_SECRET","TWITTER_ACCESS_SECRET","X_ACCESS_SECRET","ACCESS_TOKEN_SECRET"] if os.getenv(n)), None),
+}
+print("[TW VARS FOUND]", found, "| READY:", TW_READY)
+2) Wrap your Twitter job with a guard (inside your existing run_twitter)
+python
+Copy code
+def run_twitter():
+    if not TW_READY:
+        print("[Twitter] Missing env vars; skipping Twitter job.")
+        return
+    auth = tweepy.OAuth1UserHandler(TW_API_KEY, TW_API_SECRET, TW_ACCESS_TOKEN, TW_ACCESS_SECRET)
+    api = tweepy.API(auth)
+    try:
+        me = api.verify_credentials()
+        print(f"[Twitter] Logged in as @{me.screen_name}")
+    except Exception as e:
+        print("[Twitter] verify_credentials error:", e)
+        return
+    # ... your existing Twitter logic ...
 # -------------------------------
 # CONFIG
 # -------------------------------
