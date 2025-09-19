@@ -168,3 +168,18 @@ print("Bot started...")
 while True:
     schedule.run_pending()
     time.sleep(60)
+# --- Scheduling (bottom of file) ---
+
+if TW_READY:
+    schedule.every(30).minutes.do(run_twitter)
+else:
+    print("[Twitter] Not configured; skipping Twitter schedule.")
+
+schedule.every(1).hours.do(run_reddit)
+schedule.every().day.at("09:00").do(run_email)
+
+print("Bot started...")
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
