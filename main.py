@@ -199,27 +199,21 @@ def send_report():
 # SCHEDULER
 # -------------------------------
 
-schedule.every(30).minutes.do(run_twitter)
-schedule.every(45).minutes.do(run_reddit)
-schedule.every().day.at("23:00").do(send_report)
-
-print("Bot started...")
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
-# --- Scheduling ---
+# Twitter job
 if TW_READY:
     schedule.every(30).minutes.do(run_twitter)
 else:
     print("[Twitter] Not configured; skipping Twitter schedule.")
 
-# Example other jobs:
-# schedule.every(1).hours.do(run_reddit)
-# schedule.every().day.at("09:00").do(run_email)
+# Reddit job
+schedule.every(45).minutes.do(run_reddit)
 
-print("Bot started...")
+# Daily email/report job
+schedule.every().day.at("23:00").do(send_report)
 
+print("Bot started...", flush=True)
+
+# --- Main loop ---
 while True:
     schedule.run_pending()
     time.sleep(1)
