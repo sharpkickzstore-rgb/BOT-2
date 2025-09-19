@@ -1,15 +1,9 @@
 import os
-import random
 import time
-import requests
 import tweepy
-import praw
 import schedule
 import smtplib
-from email.mime.text import MIMETimport os
-import tweepy
-import schedule
-import time
+from email.mime.text import MIMEText
 
 # --- Twitter env handling ---
 def _get_env_any(*names):
